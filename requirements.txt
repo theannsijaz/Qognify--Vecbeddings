@@ -1,0 +1,8 @@
+flask>=2.3
+numpy>=1.22
+langchain>=0.1.0
+langchain-community>=0.0.18
+cohere>=4.48
+PyMuPDF>=1.23
+docx2txt>=1.0
+python-docx>=1.0 
