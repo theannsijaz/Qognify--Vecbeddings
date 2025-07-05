@@ -3,9 +3,9 @@
 Qognify is a lightweight web application that turns any academic PDF or DOCX into an actionable study pack:
 
 * **Summary** – a concise, map-reduce-style overview of the document.
-* **Multiple-Choice Questions (MCQs)** – 5 questions with four options each (answer pre-marked).
-* **Short-Answer Questions** – 5 open-ended questions answerable directly from the text.
-* **Exploratory (Curiosity) Questions** – 5 higher-order questions automatically ranked by novelty so learners can dig deeper.
+* **Multiple-Choice Questions (MCQs)** – Questions with options each (answer pre-marked).
+* **Short-Answer Questions** – Open-ended questions answerable directly from the text.
+* **Exploratory (Curiosity) Questions** – Higher-order questions automatically ranked by novelty so learners can dig deeper.
 
 Under the hood the app combines **LangChain** orchestration with **Cohere** LLMs / embeddings and a minimal **Flask** interface. All processing happens on-the-fly; no data is stored on the server.
 
