@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Qognify – AI Study Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-Dqz8eazAdzTZziEtGlUZEM6I4vGU+mLjxJvLC9OtJk9g+7FXGeuXEt3G5UpiRaY1oCbcnZ6+QcmGeX4d9kGAhw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-primary shadow-sm">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <i class="fas fa-lightbulb me-2"></i>
+          <span class="fw-semibold">Qognify</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category=='danger' else category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main -->
+    <main class="py-5" style="min-height: 80vh;">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <!-- Upload card -->
+            <div class="card shadow-sm border-0">
+              <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">AI Study Generator</h2>
+                <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                  <div class="input-group mb-3">
+                    <input type="file" class="form-control" name="pdf" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
+                    <button class="btn btn-primary" type="submit">Generate</button>
+                  </div>
+                  <div class="form-text text-center">Accepted formats: PDF or DOCX</div>
+                </form>
+                {% if summary %}
+                <div class="alert alert-info mt-3" role="alert">
+                  Processing complete! Scroll down to view the generated content.
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if summary %}
+            <!-- Results accordion -->
+            <div class="accordion mt-4" id="resultsAccordion">
+              <!-- Summary -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingSummary">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseSummary"
+                    aria-expanded="true"
+                    aria-controls="collapseSummary"
+                  >
+                    <i class="fas fa-file-alt me-2"></i>Summary
+                  </button>
+                </h2>
+                <div
+                  id="collapseSummary"
+                  class="accordion-collapse collapse show"
+                  aria-labelledby="headingSummary"
+                  data-bs-parent="#resultsAccordion"
+                >
+                  <div class="accordion-body">
+                    <p>{{ summary }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MCQs -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingMCQ">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseMCQ"
+                    aria-expanded="false"
+                    aria-controls="collapseMCQ"
+                  >
+                    <i class="fas fa-question-circle me-2"></i>Multiple-Choice Questions
+                  </button>
+                </h2>
+                <div
+                  id="collapseMCQ"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingMCQ"
+                  data-bs-parent="#resultsAccordion"
+                >
+                  <div class="accordion-body">
+                    <pre>{{ mcqs }}</pre>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Short answer -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingShort">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseShort"
+                    aria-expanded="false"
+                    aria-controls="collapseShort"
+                  >
+                    <i class="fas fa-brain me-2"></i>Short-Answer Questions
+                  </button>
+                </h2>
+                <div
+                  id="collapseShort"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingShort"
+                  data-bs-parent="#resultsAccordion"
+                >
+                  <div class="accordion-body">
+                    <pre>{{ questions }}</pre>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Exploratory questions -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingCuriosity">
+                  <button
+                    class="accordion-button collapsed text-warning"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseCuriosity"
+                    aria-expanded="false"
+                    aria-controls="collapseCuriosity"
+                  >
+                    <i class="fas fa-compass me-2"></i>Exploratory Questions
+                  </button>
+                </h2>
+                <div
+                  id="collapseCuriosity"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingCuriosity"
+                  data-bs-parent="#resultsAccordion"
+                >
+                  <div class="accordion-body">
+                    <p class="small text-muted mb-2">Ranked by novelty (higher = more exploratory)</p>
+                    <pre>{{ curiosity }}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light py-3 text-center small text-muted">
+      Built with <span class="text-danger">&#10084;</span> by Anns, Rehan and Momin!
+    </footer>
+
+    <!-- Bootstrap JS (bundle includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Small helper script for loading indicator -->
+    <script>
+      (() => {
+        const form = document.getElementById('uploadForm');
+        if (form) {
+          form.addEventListener('submit', () => {
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn) {
+              btn.disabled = true;
+              btn.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Generating…';
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
